@@ -25,7 +25,7 @@ def read_from_sql(filename) -> dict:
 
 
 def write_to_sql(data) -> None:
-    filename = "./util/merged_sub.db"
+    filename = "./materials/merged_sub.db"
     tablename = "subscriptions"
     try:
         connect = sqlite3.connect(filename)
@@ -63,7 +63,7 @@ def read_from_csv(filename) -> dict:
 
 
 def write_to_csv(data) -> None:
-    new_name = "./util/merged_sub.csv"
+    new_name = "./materials/merged_sub.csv"
     with open(new_name, "w", encoding="utf-8", newline='') as file:
         fieldnames = ["Channel ID", "Channel URL", "Channel title"]
         writer = csv.writer(file, dialect='excel')
@@ -159,7 +159,7 @@ def write_to_json(dict_data) -> None:
         dict_j["subscriptions"].append({"url": v0, "name": v1})
     data = json.dumps(dict_j)
     # print(data)
-    with open("./util/merged_sub.json", "w", encoding="utf-8") as file:
+    with open("./materials/merged_sub.json", "w", encoding="utf-8") as file:
         file.writelines(data)
 
 
@@ -218,11 +218,11 @@ def write_data(format, merged) -> None:
 def main():
     filename_old = old_data = ""
     filename_new = ""
-    # filename_old = "./util/combine.txt"
-    filename_old = "./util/subs_old.csv"
-    # filename_new = "./util/subs_new.csv"
-    # filename_new = "./util/subs_new.db"
-    filename_new = "./util/subs_old.json"
+    # filename_old = "./materials/combine.txt"
+    filename_old = "./materials/subs_old.csv"
+    filename_new = "./materials/subs_new.json"
+    # filename_new = "./materials/subs_new.db"
+    # filename_new = "./materials/subs_old.json"
 
     if not is_correct_name(filename_new):
         return

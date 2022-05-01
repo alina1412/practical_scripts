@@ -4,12 +4,13 @@ from collections import namedtuple
 
 
 class SqlManager:
-    def __init__(self) -> None:
-        self.db = "books_storage.db"
-        self.table_name = "books"
-        self.column1 = "author"
-        self.column2 = "name"
-        self.column3 = "tags"
+    def __init__(self, init_data) -> None:
+        # self.init_data = init_data
+        self.db = init_data.db_name    # "books_storage.db"
+        self.table_name = init_data.table_name  # "books"
+        self.column1 = init_data.column1        # "author"
+        self.column2 = init_data.column2        # "title"
+        self.column3 = init_data.column3        # "tags"
 
         self.create_q = f"""CREATE table IF NOT EXISTS
             {self.table_name} (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,8 +32,7 @@ class SqlManager:
             cursor.create_function('REGEXP', 2, lambda x, y:
                                    bool(re.search(x, y)))
             for row in cursor.execute(q):
-                cur_select = SEL(*row)
-                lst.append(cur_select)
+                lst.append(SEL(*row))
         return lst
 
     def insert_sql(self, args):
@@ -43,55 +43,46 @@ class SqlManager:
             cursor.execute(q, tuple([*args]))
             cursor.commit()
 
-    def make_condition_str(self, data):
-        q1 = data[self.column1]
-        q2 = data[self.column2]
-        s1 = f"{self.column1} = '{q1}'" if q1 else ""
-        s2 = f"{self.column2} = '{q2}'" if q2 else ""
 
-        if data[self.column3]:
-            v = data[self.column3]
-            # x = [rf'{v}']
-            x = rf'{v}'
-            s3 = f'{self.column3} REGEXP "{x}"'
+class SelectConditions:
+
+    def book_search_condition(self, data):
+        cond_lst = []
+        for k, v in data.items():
+            cond = self.search_part(k, v)
+            if cond:
+                cond_lst.append(cond)
+        if not cond_lst:
+            return ""
         else:
-            s3 = ""
+            return self.join_conditions(cond_lst)
 
-        lst = [x for x in [s1, s2, s3] if x]
-        condition = " AND ".join(lst)
+    def search_part(self, col_name, col_val):
+        if not col_val:
+            return ""
+
+        def get_lower_upper_pattern(words):
+            case_lst = []
+            for w in words.split(" "):
+                case_lst.append("(")
+                for ch in w:
+                    L = ch.upper()
+                    lo = ch.lower()
+                    case_lst.append("[" + L + lo + "]")
+                case_lst.append(")|")
+            return "".join(case_lst)[:-1]
+
+        pattern = get_lower_upper_pattern(col_val)
+        x = rf'{pattern}'
+        s_cond = f'{col_name} REGEXP "{x}"'
+        return s_cond
+
+    # def strict_search_condition(self, col_name, col_val):
+    #     s1 = f"{col_name} = '{col_val}'" if col_val else ""
+
+    def join_conditions(self, cond_lst):
+        condition = " AND ".join(cond_lst)
         if condition:
-            s = "WHERE " + condition
+            return "WHERE " + condition
         else:
-            s = ""
-        print(s)
-        return s
-
-
-# d.insert_sql(("Amy", "Worm","tag"))
-# data = {"author": "", "name": "Worm", "tags": ("A", "B")}
-# data = {"author": "", "name": "", "tags": ()}
-# data = {"author": "Amy", "name": "", "tags": ("tag",)}
-# cond = d.make_condition_str(data)
-
-# print(list(d.select_sql(cond)))
-
-# s.insert_sql(("Tom", "Worm","tag2"))
-# res = s.select_sql("Amy")
-# s = SqlManager()
-# print((res))
-# data = {"author": "", "name": "", "tags": "2"}
-# condit = s.make_condition_str(data)
-# res = s.select_sql(condit)
-# print((res))
-# print("--")
-
-# import re
-# with sqlite3.connect(s.db) as cursor:
-#     cursor.create_function('REGEXP', 2, lambda x, y: 1
-# if re.search(x,y) else 0)
-#     v = "2"
-#     x = [rf'{v}']
-#     q = f'SELECT * FROM {s.table_name} WHERE {s.column3} REGEXP "{x}"'
-#     res = cursor.execute(q)
-
-#     print(list(res))
+            return ""

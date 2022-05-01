@@ -1,2 +1,5 @@
 readme.txt
 books_storage copy.db
+.env
+examples/*
+example_*

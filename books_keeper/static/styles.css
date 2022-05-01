@@ -81,3 +81,13 @@ tbody tr:nth-of-type(odd) {
     background-color: rgb(179, 208, 255, 0.3)
 }
 
+.flash {
+    color: rgb(76, 5, 64);
+    background-color: rgba(135, 206, 236, 0.3);
+    text-align: center;
+}
+
+
+left {
+    text-align: left;
+}

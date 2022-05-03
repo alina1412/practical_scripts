@@ -4,15 +4,15 @@ import re
 from db_manager import SqlManager
 
 
-class UDataBase:
+class UserManager:
     def __init__(self) -> None:
         DB_init = namedtuple("DB_init", ['db_name', "table_name",
-        "column1", "column2", "column3"])
+                             "column1", "column2", "column3"])
 
-        init_data = DB_init("users_logs.db", "logs", 
-        "email", "password", "info")   
+        init_data = DB_init("users_logs.db", "logs",
+                            "email", "password", "info")
 
-        self.UserMan = SqlManager(init_data)      
+        self.UserMan = SqlManager(init_data)
 
     def getUserByEmail(self, email):
         if not PasswordLogs.validate_email(email):
@@ -34,7 +34,7 @@ class UDataBase:
             return "not valid email"
         if not PasswordLogs.validate_password(password):
             return "password should have from 5 to 20 symbols, " +\
-            "including digits, letters. Could include: _ - *"
+                    "including digits, letters. Could include: _ - *"
 
         if not self.getUserByEmail(email):
             password = PasswordLogs.u_hash(password)
@@ -52,10 +52,10 @@ class UDataBase:
         data = self.getUserByEmail(email)
         if data:
             # password - column 2
-            if data[0][2] == PasswordLogs.u_hash(password):
+            # if data[0][2] == PasswordLogs.u_hash(password):
+            if getattr(data[0], 'password') == PasswordLogs.u_hash(password):
                 return True
         return False
-
 
 
 class PasswordLogs:
@@ -74,12 +74,12 @@ class PasswordLogs:
     def validate_email(email):
         if email.count("@") != 1:
             return False
-        regex = re.compile(r"([-!#-'*+/-9=?A-Z^-~]+"+
-        r"(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|"+
-        r"(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+"+
-        r"(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])")
+        r = re.compile(r"([-!#-'*+/-9=?A-Z^-~]+" +
+                       r"(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|" +
+                       r"(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+" +
+                       r"(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])")
 
-        if re.fullmatch(regex, email):
+        if re.fullmatch(r, email):
             return True
         else:
             return False
@@ -92,3 +92,9 @@ class PasswordLogs:
             if not (ch in "_-*" or ch.isdigit() or ch.isalpha()):
                 return False
         return True
+
+# u = UDataBase()
+# res = u.getUserByEmail("123@1h.ru")
+# print(res)
+# res = u.is_log_in("123@1h.ru", "qwert")
+# print(res)

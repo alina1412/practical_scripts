@@ -2,7 +2,7 @@ import sys
 import os
 address = os.environ.get("address")                     # RUN IN DEBUG!!!
 sys.path.append(address)                                # type: ignore
-from user_data_base import PasswordLogs                 # type: ignore # noqa
+from user_manager import PasswordLogs                 # type: ignore # noqa
 
 
 assert PasswordLogs.validate_email("1,1@i") == False

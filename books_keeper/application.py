@@ -1,12 +1,9 @@
-from functools import wraps
-# from urllib import response
 from flask import Flask, flash, redirect, \
             render_template, request, session, url_for
-# , jsonify
-# from flask.ext.session import Session
-# from flask_login import LoginManager, login_user, login_required
+
+from functools import wraps
 from book_manager import BookManager
-from user_data_base import UDataBase
+from user_manager import UserManager
 
 # Configure application
 # sess = Session()
@@ -14,9 +11,6 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
-
-# dbase = UDataBase()
-bookMan = BookManager()
 
 
 def login_required(f):
@@ -44,7 +38,10 @@ def switch(response):
 @app.route("/hello", methods=["GET", "POST"])
 @login_required
 def hello():
-    # print(session['logged_in'])
+
+    user_email = "[" + session["email"] + "]"
+    bookMan = BookManager(user_email)
+
     if request.method == "POST":
         # TODO: Add / search entry into the database
         todo, query = get_forms()
@@ -56,14 +53,16 @@ def hello():
     else:
         # TODO: Display the entries in the database on index.html
         sel_all = {"author": "", "title": "", "tags": ""}
-        data = bookMan.process_search(sel_all)
-        # print(data)
+        data = bookMan.process_regexp_search(sel_all)
+        # print(user_email)
         return render_template("hello.html", data=data, error="")
 
 
 @app.route("/logout")
 def logout():
     session["logged_in"] = False
+    # session["books"] = False
+    session["email"] = False
     flash("you were logged out")
     return redirect(url_for('login'))
 
@@ -74,7 +73,7 @@ def register():
         email = request.form['email']
         password = request.form['password']
         print(email, password)
-        ret = UDataBase().register_user(email, password)
+        ret = UserManager().register_user(email, password)
         if ret == "success":
             flash("register successfully!")
             return redirect('/login')
@@ -92,13 +91,15 @@ def login():
     if request.method == "POST":
         email = request.form['email']
         password = request.form['password']
-        # print(email, type(email), password)
+        # Debug mode "1" - "1"
         if email == "1" and password == "1":
             session["logged_in"] = True
+            session["email"] = "books"
             return redirect('/hello')
         else:
-            if UDataBase().is_log_in(email, password):
+            if UserManager().is_log_in(email, password):
                 session["logged_in"] = True
+                session["email"] = email
                 return redirect('/hello')
             else:
                 flash("pair login/ password - incorrect!")

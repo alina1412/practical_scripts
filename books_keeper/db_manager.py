@@ -11,6 +11,8 @@ class SqlManager:
         self.column1 = init_data.column1        # "author"
         self.column2 = init_data.column2        # "title"
         self.column3 = init_data.column3        # "tags"
+        print("self.table_name", self.table_name,
+              type(self.table_name, ), self.db)
 
         self.create_q = f"""CREATE table IF NOT EXISTS
             {self.table_name} (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,7 +24,7 @@ class SqlManager:
             cursor.execute(self.create_q)
             cursor.commit()
 
-    def select_sql(self, condition=""):
+    def select_sql(self, condition="", add=""):
         q = (f"SELECT * FROM {self.table_name}" +
              " " + condition)
         SEL = namedtuple("SEL", ['id', self.column1,
@@ -31,8 +33,9 @@ class SqlManager:
         with sqlite3.connect(self.db) as cursor:
             cursor.create_function('REGEXP', 2, lambda x, y:
                                    bool(re.search(x, y)))
-            for row in cursor.execute(q):
+            for row in cursor.execute(q, add):
                 lst.append(SEL(*row))
+        print("select_sql", lst)
         return lst
 
     def insert_sql(self, args):
@@ -44,45 +47,51 @@ class SqlManager:
             cursor.commit()
 
 
-class SelectConditions:
+class SelectQuery:
 
-    def book_search_condition(self, data):
+    @staticmethod
+    def get_regexp_query(data):
         cond_lst = []
-        for k, v in data.items():
-            cond = self.search_part(k, v)
-            if cond:
-                cond_lst.append(cond)
+        for col_name, col_val in data.items():
+            if not col_val:
+                continue
+            pattern = SelectQuery.low_up_pattern(col_val)
+            cond = SelectQuery.regexp_query(pattern, col_name)
+            cond_lst.append(cond)
         if not cond_lst:
             return ""
         else:
-            return self.join_conditions(cond_lst)
+            return SelectQuery.join_conditions(cond_lst)
 
-    def search_part(self, col_name, col_val):
-        if not col_val:
-            return ""
+    @staticmethod
+    def low_up_pattern(words):
+        case_lst = []
+        for w in words.split(" "):
+            case_lst.append("(")
+            for ch in w:
+                L = ch.upper()
+                lo = ch.lower()
+                case_lst.append("[" + L + lo + "]")
+            case_lst.append(")|")
+        return "".join(case_lst)[:-1]
 
-        def get_lower_upper_pattern(words):
-            case_lst = []
-            for w in words.split(" "):
-                case_lst.append("(")
-                for ch in w:
-                    L = ch.upper()
-                    lo = ch.lower()
-                    case_lst.append("[" + L + lo + "]")
-                case_lst.append(")|")
-            return "".join(case_lst)[:-1]
-
-        pattern = get_lower_upper_pattern(col_val)
+    @staticmethod
+    def regexp_query(pattern, col_name):
         x = rf'{pattern}'
         s_cond = f'{col_name} REGEXP "{x}"'
         return s_cond
 
-    # def strict_search_condition(self, col_name, col_val):
-    #     s1 = f"{col_name} = '{col_val}'" if col_val else ""
+    @staticmethod
+    def strict_search_query(col_name, col_val):
+        return f"{col_name} = '{col_val}'" if col_val else ""
 
-    def join_conditions(self, cond_lst):
+    @staticmethod
+    def join_conditions(cond_lst):
         condition = " AND ".join(cond_lst)
         if condition:
             return "WHERE " + condition
         else:
             return ""
+
+
+# s = SqlManager()

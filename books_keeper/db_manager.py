@@ -92,6 +92,3 @@ class SelectQuery:
             return "WHERE " + condition
         else:
             return ""
-
-
-# s = SqlManager()

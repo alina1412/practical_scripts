@@ -86,7 +86,7 @@ def print_dict_data(added, deleted) -> None:
         print("No deleted subscriptions from the first file\n")
 
 
-def compare_dicts(dnew, dold={}) -> dict:
+def compare_dicts(dnew, dold={}):
     deleted = set()
     added = set()
     repeated = set()
@@ -156,7 +156,7 @@ def write_to_json(dict_data) -> None:
               "app_version": "0.19.8",
               "app_version_int": 953}
     for k, [v0, v1] in dict_data.items():
-        dict_j["subscriptions"].append({"url": v0, "name": v1})
+        dict_j["subscriptions"].append({"url": v0, "name": v1})     # type: ignore
     data = json.dumps(dict_j)
     # print(data)
     with open("./materials/merged_sub.json", "w", encoding="utf-8") as file:
@@ -174,7 +174,7 @@ def read_file(filename) -> dict:
         elif end == "db":
             data = read_from_sql(filename)
         else:
-            return None
+            return {}
     except Exception as x:
         print(x)
     return data

@@ -2,6 +2,8 @@ import sqlite3
 import re
 from collections import namedtuple
 
+# classes SqlManager, SelectQuery
+
 
 class SqlManager:
     def __init__(self, init_data) -> None:

@@ -1,7 +1,9 @@
-import sqlite3
-from collections import namedtuple
 import re
+from collections import namedtuple
+from sqlite3 import Error as sqlite3_err
 from db_manager import SqlManager
+
+# classes UserManager, PasswordLogs
 
 
 class UserManager:
@@ -25,8 +27,8 @@ class UserManager:
                 print("no such user")
                 return False
             return res
-        except sqlite3.Error as e:
-            print("Error", e)
+        except sqlite3_err:
+            print("Error", sqlite3_err)
         return False
 
     def register_user(self, email, password, info=""):
@@ -41,9 +43,9 @@ class UserManager:
             try:
                 self.UserMan.insert_sql((email, password, info))
                 return "success"
-            except sqlite3.Error as e:
-                print(e)
-                return "something went wrong. " + str(e)
+            except sqlite3_err:
+                print(sqlite3_err)
+                return "something went wrong. " + str(sqlite3_err)
         return "user with this name exists"
 
     def is_log_in(self, email, password):

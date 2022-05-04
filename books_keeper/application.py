@@ -91,8 +91,8 @@ def login():
     if request.method == "POST":
         email = request.form['email']
         password = request.form['password']
-        # Debug mode "1" - "1"
-        if email == "1" and password == "1":
+        # Debug mode "a@1.ru"
+        if email == "a@1.ru" and password == "qwert":
             session["logged_in"] = True
             session["email"] = "books"
             return redirect('/hello')
